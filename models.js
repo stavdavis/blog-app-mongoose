@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 // this is our schema to represent a blogpost
 const blogpostSchema = mongoose.Schema({
   title: {type: String, required: true},
-  content: {type: String, required: true},
+  content: {type: String},
   author: {
     firstName: String,
     lastName: String 
-  }
-  created: {type: Date, required: true},
+  },
+  created: {type: Date, default: Date.now}
 });
 
 // *virtuals* (http://mongoosejs.com/docs/guide.html#virtuals)
@@ -16,19 +16,19 @@ const blogpostSchema = mongoose.Schema({
 // properties that are stored in the database. Here we use it
 // to generate a human readable string based on the address object
 // we're storing in Mongo.
-blogpostsSchema.virtual('authorString').get(function() {
+blogpostSchema.virtual('authorString').get(function() {
   return `${this.author.firstName} ${this.author.lastName}`.trim()});
 
 // this is an *instance method* which will be available on all instances
 // of the model. This method will be used to return an object that only
 // exposes *some* of the fields we want from the underlying data
-blogpostsSchema.methods.apiRepr = function() {
+blogpostSchema.methods.apiRepr = function() {
 
   return {
     id: this._id,
-    title: this.title,
-    content: this.content,
     author: this.authorString,
+    content: this.content,
+    title: this.title,
     created: this.created,
   };
 }

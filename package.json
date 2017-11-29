@@ -2,19 +2,20 @@
   "name": "blog-app-mongoose",
   "version": "1.0.0",
   "description": "A bloggin app, with CRUD API",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "test": "mocha"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Stav Davis",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "mongoose": "^4.7.2",
-    "morgan": "^1.7.0"
+    "morgan": "^1.7.0",
+    "uuid": "^2.0.3"
   },
   "devDependencies": {
     "chai": "^3.5.0",

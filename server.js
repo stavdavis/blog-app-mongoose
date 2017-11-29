@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const express = require('express');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
 
 // Mongoose internally uses a promise-like object,
 // but its better to make Mongoose use built in es6 promises
@@ -16,17 +17,14 @@ app.use(bodyParser.json());
 
 
 // GET requests to /blogposts
-app.get('/blogposts', (req, res) => {
+app.get('/posts', (req, res) => {
   Blogpost
     .find()
     // success callback: for each blogpost we got back, we'll
     // call the `.apiRepr` instance method we've created in
     // models.js in order to only expose the data we want the API return.
-    .then(blogposts => {
-      res.json({
-        blogposts: blogposts.map(
-          (blogpost) => blogpost.apiRepr())
-      });
+    .then(posts => {
+      res.json(posts.map(post => post.apiRepr()));
     })
     .catch(
       err => {
@@ -36,12 +34,12 @@ app.get('/blogposts', (req, res) => {
 });
 
 // can also request by ID
-app.get('/blogposts/:id', (req, res) => {
+app.get('/posts/:id', (req, res) => {
   Blogpost
     // this is a convenience method Mongoose provides for searching
     // by the object _id property
     .findById(req.params.id)
-    .then(blogpost =>res.json(blogpost.apiRepr()))
+    .then(post => res.json(post.apiRepr()))
     .catch(err => {
       console.error(err);
         res.status(500).json({message: 'Internal server error'})
@@ -49,9 +47,9 @@ app.get('/blogposts/:id', (req, res) => {
 });
 
 
-app.post('/blogposts', (req, res) => {
+app.post('/posts', (req, res) => {
 
-  const requiredFields = ['title', 'content', 'author', 'created'];
+  const requiredFields = ['title', 'content', 'author'];
   for (let i=0; i<requiredFields.length; i++) {
     const field = requiredFields[i];
     if (!(field in req.body)) {
@@ -65,8 +63,8 @@ app.post('/blogposts', (req, res) => {
     .create({
       title: req.body.title,
       content: req.body.content,
-      author: req.body.author,
-      created: req.body.created,
+      author: req.body.author
+    })
     .then(
       blogpost => res.status(201).json(blogpost.apiRepr()))
     .catch(err => {
@@ -76,7 +74,7 @@ app.post('/blogposts', (req, res) => {
 });
 
 
-app.put('/blogposts/:id', (req, res) => {
+app.put('/posts/:id', (req, res) => {
   // ensure that the id in the request path and the one in request body match
   if (!(req.params.id && req.body.id && req.params.id === req.body.id)) {
     const message = (
@@ -100,15 +98,15 @@ app.put('/blogposts/:id', (req, res) => {
 
   Blogpost
     // all key/value pairs in toUpdate will be updated -- that's what `$set` does
-    .findByIdAndUpdate(req.params.id, {$set: toUpdate})
-    .then(blogpost => res.status(204).end())
+    .findByIdAndUpdate(req.params.id, {$set: toUpdate}, {new: true})
+    .then(updatedPost => res.status(204).end())
     .catch(err => res.status(500).json({message: 'Internal server error'}));
 });
 
-app.delete('/blogposts/:id', (req, res) => {
+app.delete('/posts/:id', (req, res) => {
   Blogpost
     .findByIdAndRemove(req.params.id)
-    .then(blogpost => res.status(204).end())
+    .then(blogpost => res.status(204).json({message: 'succefully deleted'}))
     .catch(err => res.status(500).json({message: 'Internal server error'}));
 });
 
